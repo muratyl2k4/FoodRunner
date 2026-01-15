@@ -1,13 +1,21 @@
 using UnityEngine;
 
 
+public enum DamageBehavior
+{
+    SacrificeBottom, // Alttan eksilt (Ground Saw gibi)
+    SliceFromHit     // Çarptığı yerden yukarısını kes (Balyoz gibi)
+}
+
 public abstract class BaseObstacle : MonoBehaviour
 {
-    public int damageAmount = 1; // Kaç karakter öldüreceği
+    public int damageAmount = 1; 
+    public DamageBehavior behavior = DamageBehavior.SacrificeBottom; // Varsayılan: Alttan eksilt
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Member")) // Kalabalıktaki her bir birime çarptığında
+        // Player (Lider) ve Food (Takipçiler) için kontrol
+        if (other.CompareTag("Food") || other.CompareTag("Player")) 
         {
             HandleCollision(other.gameObject);
         }
@@ -15,10 +23,7 @@ public abstract class BaseObstacle : MonoBehaviour
 
     protected virtual void HandleCollision(GameObject member)
     {
-        // StackManager'a bu karakterin öldüğünü bildir
-        StackManager.Instance.RemoveFoodFromIndex(member);
-        
-        // Cartoon efekti: Karakteri patlat (vfx) ve yok et
-        Destroy(member);
+        // StackManager'a hasar türünü de gönderiyoruz
+        StackManager.Instance.RemoveFoodFromIndex(member, behavior);
     }
 }
